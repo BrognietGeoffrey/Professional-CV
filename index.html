@@ -461,24 +461,6 @@
   }
 
   // ---------- auth + publish ----------
-  async function requireSignIn(){
-    const f = await initFirebase();
-    if(!f){
-      alert("Configuration Firebase manquante : ouvre index.html et colle ta config Firebase dans le bloc CONFIGURATION en haut du script, puis push sur GitHub.");
-      return null;
-    }
-    if(f.auth.currentUser) return f.auth.currentUser;
-    try{
-      const res = await f.signInWithPopup(f.auth, f.provider);
-      return res.user;
-    }catch(e){
-      // Safari iOS bloque parfois les popups → redirection
-      try{ await f.signInWithRedirect(f.auth, f.provider); }catch(e2){
-        alert('Connexion impossible : ' + (e2.message || e.message));
-      }
-      return null;
-    }
-  }
 
   // Flag: user intent to edit (survives page reloads via sessionStorage)
   function wantsToEdit(){ return sessionStorage.getItem('gb-want-edit') === '1' || location.hash === '#edit'; }
@@ -494,7 +476,7 @@
       toast('Connecté : ' + (f.auth.currentUser.email || f.auth.currentUser.uid));
       return;
     }
-    // Otherwise trigger sign-in (popup first, redirect fallback)
+    // Popup only — redirect is broken with custom domain (auth/internal-error)
     try{
       const res = await f.signInWithPopup(f.auth, f.provider);
       if(res && res.user){
@@ -502,9 +484,15 @@
         toast('Connecté : ' + (res.user.email || res.user.uid));
       }
     }catch(e){
-      console.warn('popup failed, using redirect:', e.code);
-      try{ await f.signInWithRedirect(f.auth, f.provider); }
-      catch(e2){ alert('Connexion impossible : ' + (e2.message || e.message)); markWantEdit(false); }
+      console.error('Sign-in failed:', e);
+      markWantEdit(false);
+      if(e.code === 'auth/popup-blocked'){
+        alert("La popup de connexion a été bloquée par ton navigateur.\n\nAutorise les popups pour ce site puis réessaie :\n\n• Chrome : icône dans la barre d'adresse → autoriser les popups\n• Safari : Préférences → Sites web → Fenêtres pop-up → Autoriser");
+      } else if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request'){
+        toast('Connexion annulée.');
+      } else {
+        alert('Connexion impossible : ' + (e.code || e.message));
+      }
     }
   }
 
@@ -522,9 +510,6 @@
   loadPublished().then(async ()=>{
     const f = await initFirebase();
     if(!f) return;
-
-    // Handle any pending redirect result (populates currentUser)
-    try{ await f.getRedirectResult(f.auth); }catch(e){ console.warn('redirect result:', e); }
 
     // Auto-activate edit mode as soon as the user is authenticated AND wanted to edit
     f.onAuthStateChanged(f.auth, (user)=>{
