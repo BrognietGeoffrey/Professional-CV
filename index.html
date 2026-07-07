@@ -348,18 +348,18 @@
   observeReveals();
 
   // =====================================================================
-  //  CONFIGURATION FIREBASE
+  //  CONFIGURATION FIREBASE — À REMPLIR (une seule fois)
   //  Console Firebase → Paramètres du projet → Tes applications → Config
   //  Tu peux réutiliser ton projet existant (ex. lunch-order-af7e4).
   // =====================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyBuZ98mNM-FRYpIkWzb6HiZYgX7ynlMXMU",
-  authDomain: "www.geoffreybrogniet.com",
-  projectId: "lunch-order-af7e4",
-  storageBucket: "lunch-order-af7e4.firebasestorage.app",
-  messagingSenderId: "111273452874",
-  appId: "1:111273452874:web:f2d5c32f21419f8cc08db3"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBuZ98mNM-FRYpIkWzb6HiZYgX7ynlMXMU",
+    authDomain: "www.geoffreybrogniet.com",
+    projectId: "lunch-order-af7e4",
+    storageBucket: "lunch-order-af7e4.firebasestorage.app",
+    messagingSenderId: "111273452874",
+    appId: "1:111273452874:web:f2d5c32f21419f8cc08db3"
+  };
   // =====================================================================
 
   const EDITABLE = [
@@ -386,9 +386,12 @@ const firebaseConfig = {
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
     ]);
     const app = initializeApp(firebaseConfig);
+    const auth = authMod.getAuth(app);
+    // Force LOCAL persistence so the session survives the redirect round-trip
+    try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch(e) { console.warn('persistence:', e); }
     fb = {
       db: getFirestore(app),
-      auth: authMod.getAuth(app),
+      auth: auth,
       provider: new authMod.GoogleAuthProvider(),
       signInWithPopup: authMod.signInWithPopup,
       signInWithRedirect: authMod.signInWithRedirect,
@@ -477,13 +480,65 @@ const firebaseConfig = {
     }
   }
 
+  // Flag: user intent to edit (survives page reloads via sessionStorage)
+  function wantsToEdit(){ return sessionStorage.getItem('gb-want-edit') === '1' || location.hash === '#edit'; }
+  function markWantEdit(v){ v ? sessionStorage.setItem('gb-want-edit','1') : sessionStorage.removeItem('gb-want-edit'); }
+
   async function startEditing(){
-    const user = await requireSignIn();
-    if(!user) return;
-    console.log('Signed in as UID:', user.uid);
-    toast('Connecté : ' + (user.email || user.uid));
-    setEditing(true);
+    markWantEdit(true);
+    const f = await initFirebase();
+    if(!f){ alert("Firebase config missing"); return; }
+    // If already signed in, activate immediately
+    if(f.auth.currentUser){
+      setEditing(true);
+      toast('Connecté : ' + (f.auth.currentUser.email || f.auth.currentUser.uid));
+      return;
+    }
+    // Otherwise trigger sign-in (popup first, redirect fallback)
+    try{
+      const res = await f.signInWithPopup(f.auth, f.provider);
+      if(res && res.user){
+        setEditing(true);
+        toast('Connecté : ' + (res.user.email || res.user.uid));
+      }
+    }catch(e){
+      console.warn('popup failed, using redirect:', e.code);
+      try{ await f.signInWithRedirect(f.auth, f.provider); }
+      catch(e2){ alert('Connexion impossible : ' + (e2.message || e.message)); markWantEdit(false); }
+    }
   }
+
+  document.addEventListener('click', (e)=>{
+    const id = e.target.id;
+    if(id==='btn-add') addProject();
+    else if(id==='btn-publish') publish();
+    else if(id==='btn-discard'){ markWantEdit(false); discardChanges(); }
+    else if(id==='btn-done'){ markWantEdit(false); setEditing(false); }
+  });
+
+  rebindFooterButtons();
+
+  // Load published content first, then hook up auth
+  loadPublished().then(async ()=>{
+    const f = await initFirebase();
+    if(!f) return;
+
+    // Handle any pending redirect result (populates currentUser)
+    try{ await f.getRedirectResult(f.auth); }catch(e){ console.warn('redirect result:', e); }
+
+    // Auto-activate edit mode as soon as the user is authenticated AND wanted to edit
+    f.onAuthStateChanged(f.auth, (user)=>{
+      if(user && wantsToEdit()){
+        setEditing(true);
+        toast('Connecté : ' + (user.email || user.uid));
+      }
+    });
+
+    // Also trigger sign-in flow if arrived via #edit and not yet signed in
+    if(location.hash === '#edit' && !f.auth.currentUser){
+      startEditing();
+    }
+  });
 
   async function publish(){
     const f = await initFirebase();
@@ -527,27 +582,6 @@ const firebaseConfig = {
     const tgl = $('#edit-toggle');
     if(tgl) tgl.addEventListener('click', startEditing);
   }
-
-  document.addEventListener('click', (e)=>{
-    const id = e.target.id;
-    if(id==='btn-add') addProject();
-    else if(id==='btn-publish') publish();
-    else if(id==='btn-discard') discardChanges();
-    else if(id==='btn-done') setEditing(false);
-  });
-
-  rebindFooterButtons();
-  loadPublished().then(async ()=>{
-    // Si retour d'une connexion par redirection, reprendre l'édition
-    const f = fb;
-    if(f){
-      try{
-        const res = await f.getRedirectResult(f.auth);
-        if(res && res.user){ setEditing(true); toast('Connecté : ' + (res.user.email || res.user.uid)); }
-      }catch(e){ /* ignore */ }
-    }
-    if(location.hash === '#edit') startEditing();
-  });
 </script>
 </body>
 </html>
