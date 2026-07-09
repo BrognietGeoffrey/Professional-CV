@@ -128,23 +128,6 @@
     .reveal{opacity:1;transform:none;transition:none}
     .ticket{transition:none}
   }
-
-  /* ---------- edit mode ---------- */
-  body.editing [contenteditable="true"]{outline:1.5px dashed var(--amber);outline-offset:3px;border-radius:3px;cursor:text}
-  body.editing [contenteditable="true"]:focus{outline-style:solid;background:rgba(232,161,61,.07)}
-  body.editing .reveal{opacity:1;transform:none}
-  .del-btn{display:none;position:absolute;top:-10px;right:-10px;width:26px;height:26px;border-radius:50%;border:none;background:#B3402E;color:#fff;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-  body.editing .del-btn{display:block}
-  body.editing .ticket{position:relative;overflow:visible}
-  #edit-toolbar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--ink);padding:10px 16px;justify-content:center;gap:8px;flex-wrap:wrap;box-shadow:0 -4px 16px rgba(20,38,63,.3)}
-  body.editing #edit-toolbar{display:flex}
-  #edit-toolbar button{font-family:var(--disp);font-weight:600;font-size:13px;padding:9px 14px;border-radius:6px;border:none;cursor:pointer;background:#2A4166;color:#fff}
-  #edit-toolbar button:hover{background:#3A5580}
-  #edit-toolbar button.accent{background:var(--amber);color:#1A1A1A}
-  #edit-toolbar button.danger{background:#7A3226}
-  #edit-toolbar .hint{width:100%;text-align:center;font-size:11.5px;color:#9FB4D1;font-family:var(--mono)}
-  body.editing{padding-bottom:110px}
-  .edit-link{background:none;border:none;font-family:var(--mono);font-size:12px;color:#8FA3BE;cursor:pointer;padding:0;text-decoration:underline dotted}
 </style>
 </head>
 <body>
@@ -220,12 +203,6 @@
           <h3>Fleet Renewals — iPhones &amp; Printers</h3>
           <p>Full renewal of the internal iPhone fleet in Belgium and replacement of 80 printers across 4 sites — procurement to cutover, without service interruption.</p>
           <div class="meta">scope: BE, 4 sites &nbsp;·&nbsp; role: project lead</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip live">In Delivery</span><span class="budget">70k+</span></div>
-          <h3>MFA and P1K enrolment</h3>
-          <p>Coordinated the P1K passwordless authentication and MFA enrolment for 3,500+ users — engineer scheduling, stakeholder availability and backend logistics, bridging field work and planning.</p>
-          <div class="meta">scope: FR, 1 site &nbsp;·&nbsp; role: project lead</div>
         </article>
       </div>
     </div>
@@ -333,246 +310,16 @@
         <a href="tel:+32493731377">+32 493 73 13 77</a>
       </div>
     </div>
-    <p class="small">Geoffrey Brogniet · Zaventem, Belgium · Based near Brussels, open to roles across Belgium. &nbsp; <button class="edit-link" id="edit-toggle" type="button">✎ Edit this site</button></p>
+    <p class="small">Geoffrey Brogniet · Zaventem, Belgium · Based near Brussels, open to roles across Belgium.</p>
   </div>
 </footer>
 
-<div id="edit-toolbar" role="toolbar" aria-label="Site editing">
-  <span class="hint">Tap any outlined text to edit it. “Publish” makes your changes live for everyone, instantly.</span>
-  <button type="button" id="btn-add" class="accent">＋ Add project</button>
-  <button type="button" id="btn-publish" class="accent">🚀 Publish</button>
-  <button type="button" id="btn-discard" class="danger">Discard changes</button>
-  <button type="button" id="btn-done">Done</button>
-</div>
-
-<script type="module">
-  // ---------- reveal on scroll ----------
+<script>
+  // Reveal on scroll
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
   },{threshold:.12});
-  const observeReveals = () => document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));
-  observeReveals();
-
-  // =====================================================================
-  //  CONFIGURATION FIREBASE — À REMPLIR (une seule fois)
-  //  Console Firebase → Paramètres du projet → Tes applications → Config
-  //  Tu peux réutiliser ton projet existant (ex. lunch-order-af7e4).
-  // =====================================================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBuZ98mNM-FRYpIkWzb6HiZYgX7ynlMXMU",
-    authDomain: "lunch-order-af7e4.firebaseapp.com",
-    projectId: "lunch-order-af7e4",
-    storageBucket: "lunch-order-af7e4.firebasestorage.app",
-    messagingSenderId: "111273452874",
-    appId: "1:111273452874:web:f2d5c32f21419f8cc08db3"
-  };
-  // =====================================================================
-
-  const EDITABLE = [
-    '.hero .eyebrow','h1','.thesis','.stat .n','.stat .l',
-    '.sec-head h2',
-    '.ticket h3','.ticket p','.ticket .meta','.ticket .budget','.ticket .chip',
-    '.xp-item .dates','.xp-item h3','.xp-item .org','.xp-item li',
-    '.project .eyebrow','.project h3','.project p','.stack span',
-    '.skill h3','.skill li',
-    'footer h2','footer .small'
-  ].join(',');
-
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-
-  let fb = null; // { db, auth, doc, getDoc, setDoc, serverTimestamp, provider, signInWithPopup, signInWithRedirect }
-
-  async function initFirebase(){
-    if(fb) return fb;
-    if(!firebaseConfig.apiKey){ return null; }
-    const [{ initializeApp }, { getFirestore, doc, getDoc, setDoc, serverTimestamp }, authMod] = await Promise.all([
-      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
-      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'),
-      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
-    ]);
-    const app = initializeApp(firebaseConfig);
-    const auth = authMod.getAuth(app);
-    // Force LOCAL persistence so the session survives the redirect round-trip
-    try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch(e) { console.warn('persistence:', e); }
-    fb = {
-      db: getFirestore(app),
-      auth: auth,
-      provider: new authMod.GoogleAuthProvider(),
-      signInWithPopup: authMod.signInWithPopup,
-      signInWithRedirect: authMod.signInWithRedirect,
-      getRedirectResult: authMod.getRedirectResult,
-      onAuthStateChanged: authMod.onAuthStateChanged,
-      doc, getDoc, setDoc, serverTimestamp
-    };
-    return fb;
-  }
-
-  // ---------- load published content ----------
-  async function loadPublished(){
-    const f = await initFirebase();
-    if(!f) return;
-    try{
-      const snap = await f.getDoc(f.doc(f.db, 'portfolio', 'content'));
-      if(snap.exists()){
-        const d = snap.data();
-        if(d.main) $('main').innerHTML = d.main;
-        if(d.footer) $('footer').innerHTML = d.footer;
-        rebindFooterButtons();
-        observeReveals();
-      }
-    }catch(e){ console.warn('Could not load published content:', e); }
-  }
-
-  // ---------- edit mode ----------
-  function setEditing(on){
-    document.body.classList.toggle('editing', on);
-    $$(EDITABLE).forEach(el => on ? el.setAttribute('contenteditable','true') : el.removeAttribute('contenteditable'));
-    if(on){ $$('.ticket').forEach(addDeleteBtn); }
-    else { $$('.del-btn').forEach(b=>b.remove()); }
-  }
-
-  function addDeleteBtn(ticket){
-    if(ticket.querySelector('.del-btn')) return;
-    const btn = document.createElement('button');
-    btn.className = 'del-btn'; btn.type = 'button';
-    btn.textContent = '×'; btn.title = 'Delete this project'; btn.setAttribute('aria-label','Delete this project');
-    btn.addEventListener('click', ()=>{ if(confirm('Delete this project card?')) ticket.remove(); });
-    ticket.appendChild(btn);
-  }
-
-  function addProject(){
-    const board = $('.board');
-    const el = document.createElement('article');
-    el.className = 'ticket reveal in';
-    el.innerHTML = `
-      <div class="top"><span class="chip done">DELIVERED</span><span class="budget">SCOPE / €</span></div>
-      <h3>New project title</h3>
-      <p>Describe the problem, what you did, and the result. Two sentences maximum — make each word earn its place.</p>
-      <div class="meta">scope: … &nbsp;·&nbsp; role: …</div>`;
-    board.prepend(el);
-    if(document.body.classList.contains('editing')){
-      $$('h3,p,.meta,.budget,.chip', el).forEach(n=>n.setAttribute('contenteditable','true'));
-      addDeleteBtn(el);
-    }
-    el.querySelector('h3').focus();
-    el.scrollIntoView({behavior:'smooth', block:'center'});
-  }
-
-  function cleanClone(node){
-    const c = node.cloneNode(true);
-    $$('[contenteditable]', c).forEach(n=>n.removeAttribute('contenteditable'));
-    $$('.del-btn', c).forEach(n=>n.remove());
-    return c;
-  }
-
-  // ---------- auth + publish ----------
-
-  // Flag: user intent to edit (survives page reloads via sessionStorage)
-  function wantsToEdit(){ return sessionStorage.getItem('gb-want-edit') === '1' || location.hash === '#edit'; }
-  function markWantEdit(v){ v ? sessionStorage.setItem('gb-want-edit','1') : sessionStorage.removeItem('gb-want-edit'); }
-
-  async function startEditing(){
-    markWantEdit(true);
-    const f = await initFirebase();
-    if(!f){ alert("Firebase config missing"); return; }
-    // If already signed in, activate immediately
-    if(f.auth.currentUser){
-      setEditing(true);
-      toast('Connecté : ' + (f.auth.currentUser.email || f.auth.currentUser.uid));
-      return;
-    }
-    // Popup only — redirect is broken with custom domain (auth/internal-error)
-    try{
-      const res = await f.signInWithPopup(f.auth, f.provider);
-      if(res && res.user){
-        setEditing(true);
-        toast('Connecté : ' + (res.user.email || res.user.uid));
-      }
-    }catch(e){
-      console.error('Sign-in failed:', e);
-      markWantEdit(false);
-      if(e.code === 'auth/popup-blocked'){
-        alert("La popup de connexion a été bloquée par ton navigateur.\n\nAutorise les popups pour ce site puis réessaie :\n\n• Chrome : icône dans la barre d'adresse → autoriser les popups\n• Safari : Préférences → Sites web → Fenêtres pop-up → Autoriser");
-      } else if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request'){
-        toast('Connexion annulée.');
-      } else {
-        alert('Connexion impossible : ' + (e.code || e.message));
-      }
-    }
-  }
-
-  document.addEventListener('click', (e)=>{
-    const id = e.target.id;
-    if(id==='btn-add') addProject();
-    else if(id==='btn-publish') publish();
-    else if(id==='btn-discard'){ markWantEdit(false); discardChanges(); }
-    else if(id==='btn-done'){ markWantEdit(false); setEditing(false); }
-  });
-
-  rebindFooterButtons();
-
-  // Load published content first, then hook up auth
-  loadPublished().then(async ()=>{
-    const f = await initFirebase();
-    if(!f) return;
-
-    // Auto-activate edit mode as soon as the user is authenticated AND wanted to edit
-    f.onAuthStateChanged(f.auth, (user)=>{
-      if(user && wantsToEdit()){
-        setEditing(true);
-        toast('Connecté : ' + (user.email || user.uid));
-      }
-    });
-
-    // Also trigger sign-in flow if arrived via #edit and not yet signed in
-    if(location.hash === '#edit' && !f.auth.currentUser){
-      startEditing();
-    }
-  });
-
-  async function publish(){
-    const f = await initFirebase();
-    if(!f || !f.auth.currentUser){ toast('Connecte-toi d’abord.'); return; }
-    const btn = $('#btn-publish'); btn.disabled = true; btn.textContent = 'Publishing…';
-    try{
-      await f.setDoc(f.doc(f.db, 'portfolio', 'content'), {
-        main: cleanClone($('main')).innerHTML,
-        footer: cleanClone($('footer')).innerHTML,
-        updatedAt: f.serverTimestamp(),
-        updatedBy: f.auth.currentUser.uid
-      });
-      toast('✅ Publié — visible par tout le monde.');
-    }catch(e){
-      console.error(e);
-      toast('❌ Échec de publication : ' + (e.code || e.message));
-      if(String(e.code).includes('permission-denied')){
-        alert("Accès refusé par les règles Firestore.\n\nDans Firebase → Firestore → Règles, ajoute :\n\nmatch /portfolio/{docId} {\n  allow read: if true;\n  allow write: if request.auth != null && request.auth.uid == \"" + f.auth.currentUser.uid + "\";\n}\n\n(Ton UID est déjà inséré ci-dessus — copie-colle tel quel.)");
-      }
-    }finally{
-      btn.disabled = false; btn.textContent = '🚀 Publish';
-    }
-  }
-
-  function discardChanges(){
-    if(confirm('Abandonner les modifications non publiées et recharger la version en ligne ?')) location.reload();
-  }
-
-  function toast(msg){
-    let t = $('#gb-toast');
-    if(!t){
-      t = document.createElement('div'); t.id='gb-toast';
-      t.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#14263F;color:#fff;padding:10px 18px;border-radius:8px;font:500 13px var(--sans);z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:opacity .3s;max-width:90vw;text-align:center';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg; t.style.opacity='1';
-    clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.opacity='0'; }, 3200);
-  }
-
-  function rebindFooterButtons(){
-    const tgl = $('#edit-toggle');
-    if(tgl) tgl.addEventListener('click', startEditing);
-  }
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 </body>
 </html>
