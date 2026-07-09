@@ -153,6 +153,7 @@
     <div class="cta">
       <a class="btn primary" href="#contact">Get in touch</a>
       <a class="btn ghost" href="https://www.linkedin.com/in/brognietgeoffrey" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn ghost" href="https://github.com/BrognietGeoffrey" target="_blank" rel="noopener">GitHub</a>
     </div>
 
     <div class="stats" aria-label="Key figures">
@@ -202,12 +203,6 @@
           <h3>Fleet Renewals — iPhones &amp; Printers</h3>
           <p>Full renewal of the internal iPhone fleet in Belgium and replacement of 80 printers across 4 sites — procurement to cutover, without service interruption.</p>
           <div class="meta">scope: BE, 4 sites &nbsp;·&nbsp; role: project lead</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip live">In Delivery</span><span class="budget">70k+</span></div>
-          <h3>MFA and P1K enrolment</h3>
-          <p>Coordinated the P1K passwordless authentication and MFA enrolment for 3,500+ users — engineer scheduling, stakeholder availability and backend logistics, bridging field work and planning.</p>
-          <div class="meta">scope: FR, 1 site &nbsp;·&nbsp; role: project lead</div>
         </article>
       </div>
     </div>
@@ -311,6 +306,7 @@
       </div>
       <div class="socials">
         <a href="https://www.linkedin.com/in/brognietgeoffrey" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/BrognietGeoffrey" target="_blank" rel="noopener">GitHub</a>
         <a href="tel:+32493731377">+32 493 73 13 77</a>
       </div>
     </div>
@@ -319,6 +315,30 @@
 </footer>
 
 <script>
+  // Auto-sort project tickets by status: in-progress first, delivered last
+  (function sortTickets(){
+    const board = document.querySelector('.board');
+    if(!board) return;
+    // Lower rank = earlier in the list
+    const rank = (chipText) => {
+      const t = (chipText || '').trim().toUpperCase();
+      if(t.includes('PLANNING'))  return 0;
+      if(t.includes('DELIVERY'))  return 1;   // "IN DELIVERY"
+      if(t.includes('PROGRESS'))  return 1;
+      if(t.includes('LIVE'))      return 1;
+      if(t.includes('DELIVERED')) return 3;
+      if(t.includes('DONE'))      return 3;
+      return 2; // unknown status → middle
+    };
+    const tickets = [...board.querySelectorAll('.ticket')];
+    tickets.sort((a, b) => {
+      const ra = rank(a.querySelector('.chip')?.textContent);
+      const rb = rank(b.querySelector('.chip')?.textContent);
+      return ra - rb;
+    });
+    tickets.forEach(t => board.appendChild(t));
+  })();
+
   // Reveal on scroll
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
