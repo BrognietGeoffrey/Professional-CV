@@ -1,0 +1,36 @@
+backend:
+  name: github
+  repo: BrognietGeoffrey/Professional-CV
+  branch: master
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+
+site_url: https://www.geoffreybrogniet.com
+display_url: https://www.geoffreybrogniet.com
+logo_url: https://www.geoffreybrogniet.com/favicon.ico
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "projects"
+    label: "Projects (Selected Work cards)"
+    label_singular: "Project"
+    folder: "content/projects"
+    create: true
+    delete: true
+    slug: "{{order}}-{{slug}}"
+    identifier_field: title
+    summary: "{{title}} — {{status}}"
+    sortable_fields: ["order", "title", "status"]
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        options: ["IN PLANNING", "IN DELIVERY", "DELIVERED"]
+        default: "IN DELIVERY"
+      - { label: "Badge (budget, scope, or category)", name: "badge", widget: "string", hint: "e.g. €4M+, SECURITY, ANALYSIS" }
+      - { label: "Meta line (scope · role)", name: "meta", widget: "string", hint: "e.g. scope: BE + EU · role: project lead" }
+      - { label: "Display order (lower = earlier)", name: "order", widget: "number", default: 50, value_type: "int", min: 1, max: 999 }
+      - { label: "Description", name: "body", widget: "text", hint: "The paragraph that appears inside the card. Two sentences max." }

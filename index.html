@@ -169,43 +169,10 @@
   <section id="delivery">
     <div class="wrap">
       <div class="sec-head"><span class="idx">01</span><h2>Selected work</h2><div class="rule"></div></div>
-      <div class="board">
-        <article class="ticket reveal">
-          <div class="top"><span class="chip planning">IN PLANNING</span><span class="budget">SECURITY</span></div>
-          <h3>Secure Boot Deployment</h3>
-          <p>End-to-end project plan for a company-wide Secure Boot rollout across office, operational and manufacturing environments — 3 phases, 21 workstreams and milestones.</p>
-          <div class="meta">scope: office · operational · manufacturing &nbsp;·&nbsp; role: planning lead</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip done">DELIVERED</span><span class="budget">ESG · DATA</span></div>
-          <h3>IT Sustainability Baseline</h3>
-          <p>Automated CO₂ and energy analysis of the hardware fleet — Python, asset data, Belgium-specific emission factors — giving the organisation its first per-model environmental baseline.</p>
-          <div class="meta">tools: Python · Excel &nbsp;·&nbsp; output: ESG reporting</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip done">DELIVERED</span><span class="budget">ANALYSIS</span></div>
-          <h3>Cross-Border Procurement Fix</h3>
-          <p>Investigated a recurring laptop procurement failure at an international hub, structured the options and cost impact, and proposed Kaizen-style process improvements to management.</p>
-          <div class="meta">method: root cause → options → Kaizen recommendations</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip done">DELIVERED</span><span class="budget">€500K</span></div>
-          <h3>Smart Locker Service Design</h3>
-          <p>Designed and implemented “I Forgot”, a self-service peripheral lending service: user journey, escalation workflows and documentation — a new service, not just new hardware.</p>
-          <div class="meta">scope: HQ &nbsp;·&nbsp; role: service design + delivery</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip live">IN DELIVERY</span><span class="budget">€4M+</span></div>
-          <h3>End-of-Life Device Replacement</h3>
-          <p>4,000+ devices replaced across Belgium and Europe — vendor coordination, logistics and local IT teams, kept on schedule with minimal user disruption.</p>
-          <div class="meta">scope: BE + EU &nbsp;·&nbsp; role: project lead</div>
-        </article>
-        <article class="ticket reveal">
-          <div class="top"><span class="chip done">DELIVERED</span><span class="budget">€1.4M+</span></div>
-          <h3>Fleet Renewals — iPhones &amp; Printers</h3>
-          <p>Full renewal of the internal iPhone fleet in Belgium and replacement of 80 printers across 4 sites — procurement to cutover, without service interruption.</p>
-          <div class="meta">scope: BE, 4 sites &nbsp;·&nbsp; role: project lead</div>
-        </article>
+      <!-- Project cards are rendered from content/projects/*.md at load time.
+           Edit them via the CMS at /admin — no code changes needed. -->
+      <div class="board" id="projects-board" aria-live="polite">
+        <p class="board-loading" style="grid-column:1/-1;text-align:center;color:var(--steel);font-family:var(--mono);font-size:13px">Loading projects…</p>
       </div>
     </div>
   </section>
@@ -317,44 +284,99 @@
 </footer>
 
 <script>
-  // Normalize chips (label + class) then sort project tickets by status.
-  // In-progress first (planning → delivery → delivered), so recruiter sees
-  // what's active before what's shipped.
-  (function normalizeAndSort(){
-    const board = document.querySelector('.board');
-    if(!board) return;
+  // ------------------------------------------------------------------
+  // Project cards: loaded from content/projects/*.md via the GitHub
+  // contents API, so editing a .md through /admin (Decap CMS) updates
+  // the site without any code change.
+  // ------------------------------------------------------------------
+  const REPO = 'BrognietGeoffrey/Professional-CV';
+  const PROJECTS_PATH = 'content/projects';
+  const API_LIST = `https://api.github.com/repos/${REPO}/contents/${PROJECTS_PATH}`;
 
-    // { rank, label, cssClass } — lower rank = earlier
-    const detect = (raw) => {
-      const t = (raw || '').trim().toUpperCase();
-      if(t.includes('PLANNING'))                            return {rank:0, label:'IN PLANNING',  cssClass:'planning'};
-      if(t.includes('DELIVERY') || t.includes('PROGRESS') || t.includes('LIVE'))
-                                                            return {rank:1, label:'IN DELIVERY',  cssClass:'live'};
-      if(t.includes('DELIVERED') || t.includes('DONE') || t.includes('SHIPPED'))
-                                                            return {rank:2, label:'DELIVERED',    cssClass:'done'};
-      return {rank:99, label:t, cssClass:''}; // unknown → end
-    };
+  const statusInfo = (raw) => {
+    const t = (raw || '').trim().toUpperCase();
+    if(t.includes('PLANNING'))                            return {rank:0, label:'IN PLANNING',  cssClass:'planning'};
+    if(t.includes('DELIVERY') || t.includes('PROGRESS') || t.includes('LIVE'))
+                                                          return {rank:1, label:'IN DELIVERY',  cssClass:'live'};
+    if(t.includes('DELIVERED') || t.includes('DONE') || t.includes('SHIPPED'))
+                                                          return {rank:2, label:'DELIVERED',    cssClass:'done'};
+    return {rank:99, label:t, cssClass:''};
+  };
 
-    const tickets = [...board.querySelectorAll('.ticket')];
-    tickets.forEach(t => {
-      const chip = t.querySelector('.chip');
-      if(!chip) return;
-      const info = detect(chip.textContent);
-      chip.textContent = info.label;
-      chip.className = 'chip ' + info.cssClass;
-      t.dataset.rank = info.rank;
+  // Parse a front-matter block: ---\nkey: value\n---\nbody
+  function parseMd(text){
+    const m = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
+    if(!m) return { fields: {}, body: text.trim() };
+    const fields = {};
+    m[1].split('\n').forEach(line => {
+      const i = line.indexOf(':');
+      if(i < 0) return;
+      const key = line.slice(0, i).trim();
+      let val = line.slice(i + 1).trim();
+      if((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1);
+      }
+      fields[key] = val;
     });
+    return { fields, body: m[2].trim() };
+  }
 
-    tickets
-      .sort((a, b) => Number(a.dataset.rank) - Number(b.dataset.rank))
-      .forEach(t => board.appendChild(t));
-  })();
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
 
-  // Reveal on scroll
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  function renderCard({ title, status, badge, meta, body }){
+    const s = statusInfo(status);
+    return `
+      <article class="ticket reveal" data-rank="${s.rank}">
+        <div class="top"><span class="chip ${s.cssClass}">${escapeHtml(s.label)}</span><span class="budget">${escapeHtml(badge||'')}</span></div>
+        <h3>${escapeHtml(title||'Untitled')}</h3>
+        <p>${escapeHtml(body)}</p>
+        <div class="meta">${escapeHtml(meta||'').replace(/·/g, '&nbsp;·&nbsp;')}</div>
+      </article>`;
+  }
+
+  async function loadProjects(){
+    const board = document.getElementById('projects-board');
+    if(!board) return;
+    try {
+      // 1. List all project files in the folder.
+      const listRes = await fetch(API_LIST, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+      if(!listRes.ok) throw new Error('GitHub list failed: ' + listRes.status);
+      const files = (await listRes.json()).filter(f => f.name.endsWith('.md'));
+
+      // 2. Fetch each file's raw content in parallel.
+      const projects = await Promise.all(files.map(async f => {
+        const r = await fetch(f.download_url);
+        const text = await r.text();
+        const { fields, body } = parseMd(text);
+        return { ...fields, body, _order: Number(fields.order || 50) };
+      }));
+
+      // 3. Sort by (status rank, then manual order), then render.
+      projects.sort((a, b) => {
+        const ra = statusInfo(a.status).rank;
+        const rb = statusInfo(b.status).rank;
+        if(ra !== rb) return ra - rb;
+        return a._order - b._order;
+      });
+
+      board.innerHTML = projects.map(renderCard).join('');
+      // Re-attach the reveal observer to the new nodes.
+      board.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    } catch(err) {
+      console.error('Failed to load projects:', err);
+      board.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--steel);font-family:var(--mono);font-size:13px">Projects temporarily unavailable. Refresh in a moment, or <a href="/admin" style="color:var(--amber)">edit via the CMS</a>.</p>`;
+    }
+  }
+
+  // Reveal on scroll (shared observer so new cards also fade in)
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); revealObserver.unobserve(e.target);} });
   },{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  loadProjects();
 </script>
 </body>
 </html>
