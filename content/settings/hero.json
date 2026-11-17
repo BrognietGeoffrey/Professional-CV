@@ -1,12 +1,24 @@
 {
   "eyebrow": "IT Project Manager — Toyota Motor Europe",
-  "title_line1": "Geoffrey Brogniet.",
+  "title_line1": "Geoffrey Brogniet",
   "title_line2_accent": "Complex problems, delivered end to end.",
   "thesis": "My scope goes beyond delivery: security deployment planning, IT sustainability analysis, service design, cross-border problem-solving — on top of €6M+ of hardware programmes. And I still build software myself. That mix is the point: I'm looking for the open-ended problems, the ones you have to understand before you can plan them.",
   "stats": [
-    { "value": "€6M+", "label": "programme budgets managed" },
-    { "value": "4,000+", "label": "devices replaced across Europe" },
-    { "value": "5", "label": "domains · delivery, security, ESG, service design, product" },
-    { "value": "1", "label": "production app built & shipped solo" }
+    {
+      "value": "€6M+",
+      "label": "programme budgets managed"
+    },
+    {
+      "value": "4,000+",
+      "label": "devices replaced across Europe"
+    },
+    {
+      "value": "5",
+      "label": "domains · delivery, security, ESG, service design, product"
+    },
+    {
+      "value": "1",
+      "label": "production app built & shipped solo"
+    }
   ]
 }
