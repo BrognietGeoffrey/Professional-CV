@@ -1,0 +1,32 @@
+{
+  "cards": [
+    {
+      "title": "Project & programme",
+      "items": [
+        "Jira · Microsoft Project · ServiceNow",
+        "Stakeholder & vendor coordination",
+        "Budget follow-up · planning",
+        "Agile / Scrum · Product Owner certified",
+        "Kaizen · continuous improvement"
+      ]
+    },
+    {
+      "title": "Data & development",
+      "items": [
+        "Python · analysis & reporting automation",
+        "JavaScript · React",
+        "SQL · Firestore",
+        "Git · REST APIs · serverless (Vercel)",
+        "AI integration (Claude API)"
+      ]
+    },
+    {
+      "title": "Languages",
+      "items": [
+        "French — native",
+        "English — professional",
+        "Dutch — elementary (A2)"
+      ]
+    }
+  ]
+}

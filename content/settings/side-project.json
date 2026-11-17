@@ -1,0 +1,8 @@
+{
+  "eyebrow": "SHIPPED · IN DAILY USE",
+  "title": "Lunch Orders",
+  "description": "A team lunch-ordering web app I designed, built and deployed — used every day by ~10 colleagues. Real-time ordering and chat, multi-restaurant menus, notifications, and AI-powered menu extraction through the Claude API on Vercel serverless functions.",
+  "link_url": "https://github.com/BrognietGeoffrey/Lunch-Order",
+  "link_label": "View on GitHub →",
+  "stack": ["React", "Vite", "Firebase Firestore", "Vercel", "Serverless", "Claude API", "Real-time sync"]
+}

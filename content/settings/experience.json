@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "dates": "SEP 2023 — PRESENT",
+      "title": "Project Manager",
+      "org": "Toyota Motor Europe · via Nilort IT Group & Computacenter BV",
+      "bullets": [
+        "Own projects across security, sustainability, service design and multi-country delivery.",
+        "Coordinate vendors, logistics partners and local IT teams; follow up budgets and schedules.",
+        "Automate analysis and reporting with Python where manual processes slow things down.",
+        "Certified Product Owner (2024), applying Agile and Kaizen practices day to day."
+      ]
+    },
+    {
+      "dates": "FEB 2023 — MAY 2023",
+      "title": "Frontend Development Intern",
+      "org": "Hike-Up / Catch-Up",
+      "bullets": [
+        "Built the mobile version of the company's web tool.",
+        "Fixed bugs and improved codebase structure; aligned the UI with UX specifications."
+      ]
+    },
+    {
+      "dates": "JUNE 2024",
+      "title": "Bachelor's Degree — Technology & Computer Science",
+      "org": "EPHEC, Belgium",
+      "bullets": []
+    }
+  ]
+}

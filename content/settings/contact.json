@@ -1,0 +1,10 @@
+{
+  "heading": "Let's talk.",
+  "email": "geoffrey.brogniet@gmail.com",
+  "links": [
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/brognietgeoffrey" },
+    { "label": "GitHub",   "url": "https://github.com/BrognietGeoffrey" },
+    { "label": "+32 493 73 13 77", "url": "tel:+32493731377" }
+  ],
+  "footer_line": "Geoffrey Brogniet · Zaventem, Belgium · Based near Brussels, open to roles across Belgium."
+}

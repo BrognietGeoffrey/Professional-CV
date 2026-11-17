@@ -148,9 +148,9 @@
 
 <main>
   <div class="wrap hero">
-    <p class="eyebrow">IT Project Manager — Toyota Motor Europe</p>
-    <h1>Geoffrey Brogniet.<br><span class="accent">Complex problems,<br>delivered end to end.</span></h1>
-    <p class="thesis">My scope goes beyond delivery: security deployment planning, IT sustainability analysis, service design, cross-border problem-solving — on top of €6M+ of hardware programmes. And I still build software myself. That mix is the point: I'm looking for the open-ended problems, the ones you have to understand before you can plan them.</p>
+    <p class="eyebrow" id="hero-eyebrow">IT Project Manager — Toyota Motor Europe</p>
+    <h1 id="hero-title">Geoffrey Brogniet.<br><span class="accent">Complex problems,<br>delivered end to end.</span></h1>
+    <p class="thesis" id="hero-thesis">My scope goes beyond delivery: security deployment planning, IT sustainability analysis, service design, cross-border problem-solving — on top of €6M+ of hardware programmes. And I still build software myself. That mix is the point: I'm looking for the open-ended problems, the ones you have to understand before you can plan them.</p>
     <div class="cta">
       <a class="btn primary" href="#contact">Get in touch</a>
       <a class="btn ghost" href="/cv.pdf" download>Download CV (PDF)</a>
@@ -158,7 +158,7 @@
       <a class="btn ghost" href="https://www.linkedin.com/in/brognietgeoffrey" target="_blank" rel="noopener">LinkedIn</a>
     </div>
 
-    <div class="stats" aria-label="Key figures">
+    <div class="stats" id="hero-stats" aria-label="Key figures">
       <div class="stat"><div class="n">€6M+</div><div class="l">programme budgets managed</div></div>
       <div class="stat"><div class="n">4,000+</div><div class="l">devices replaced across Europe</div></div>
       <div class="stat"><div class="n">5</div><div class="l">domains · delivery, security, ESG, service design, product</div></div>
@@ -180,7 +180,7 @@
   <section id="experience">
     <div class="wrap">
       <div class="sec-head"><span class="idx">02</span><h2>Experience</h2><div class="rule"></div></div>
-      <div class="xp">
+      <div class="xp" id="xp-list">
         <div class="xp-item reveal">
           <span class="dates">SEP 2023 — PRESENT</span>
           <h3>Project Manager</h3>
@@ -213,16 +213,16 @@
   <section id="side">
     <div class="wrap">
       <div class="sec-head"><span class="idx">03</span><h2>Side project</h2><div class="rule"></div></div>
-      <div class="project reveal">
+      <div class="project reveal" id="side-project">
         <div>
-          <p class="eyebrow">SHIPPED · IN DAILY USE</p>
-          <h3>Lunch Orders</h3>
-          <p>A team lunch-ordering web app I designed, built and deployed — used every day by ~10 colleagues. Real-time ordering and chat, multi-restaurant menus, notifications, and AI-powered menu extraction through the Claude API on Vercel serverless functions.</p>
+          <p class="eyebrow" data-f="eyebrow">SHIPPED · IN DAILY USE</p>
+          <h3 data-f="title">Lunch Orders</h3>
+          <p data-f="description">A team lunch-ordering web app I designed, built and deployed — used every day by ~10 colleagues. Real-time ordering and chat, multi-restaurant menus, notifications, and AI-powered menu extraction through the Claude API on Vercel serverless functions.</p>
           <div class="links">
-            <a href="https://github.com/BrognietGeoffrey/Lunch-Order" target="_blank" rel="noopener">View on GitHub →</a>
+            <a data-f="link" href="https://github.com/BrognietGeoffrey/Lunch-Order" target="_blank" rel="noopener">View on GitHub →</a>
           </div>
         </div>
-        <div class="stack" aria-label="Tech stack">
+        <div class="stack" data-f="stack" aria-label="Tech stack">
           <span>React</span><span>Vite</span><span>Firebase Firestore</span><span>Vercel</span><span>Serverless</span><span>Claude API</span><span>Real-time sync</span>
         </div>
       </div>
@@ -232,7 +232,7 @@
   <section id="skills">
     <div class="wrap">
       <div class="sec-head"><span class="idx">04</span><h2>Skills &amp; languages</h2><div class="rule"></div></div>
-      <div class="skills">
+      <div class="skills" id="skills-grid">
         <div class="skill reveal">
           <h3>Project &amp; programme</h3>
           <ul>
@@ -270,28 +270,136 @@
   <div class="wrap">
     <div class="row">
       <div>
-        <h2>Let's talk.</h2>
-        <p class="mail"><a href="mailto:geoffrey.brogniet@gmail.com">geoffrey.brogniet@gmail.com</a></p>
+        <h2 id="contact-heading">Let's talk.</h2>
+        <p class="mail"><a id="contact-email" href="mailto:geoffrey.brogniet@gmail.com">geoffrey.brogniet@gmail.com</a></p>
       </div>
-      <div class="socials">
+      <div class="socials" id="contact-links">
         <a href="https://www.linkedin.com/in/brognietgeoffrey" target="_blank" rel="noopener">LinkedIn</a>
         <a href="https://github.com/BrognietGeoffrey" target="_blank" rel="noopener">GitHub</a>
         <a href="tel:+32493731377">+32 493 73 13 77</a>
       </div>
     </div>
-    <p class="small">Geoffrey Brogniet · Zaventem, Belgium · Based near Brussels, open to roles across Belgium.</p>
+    <p class="small" id="contact-footer-line">Geoffrey Brogniet · Zaventem, Belgium · Based near Brussels, open to roles across Belgium.</p>
   </div>
 </footer>
 
 <script>
   // ------------------------------------------------------------------
-  // Project cards: loaded from content/projects/*.md via the GitHub
-  // contents API, so editing a .md through /admin (Decap CMS) updates
-  // the site without any code change.
+  // Dynamic content: loaded from the repo so editing via /admin
+  // updates the site without any code change. Fallback = the hard-coded
+  // HTML stays visible if a fetch fails.
   // ------------------------------------------------------------------
   const REPO = 'BrognietGeoffrey/Professional-CV';
   const PROJECTS_PATH = 'content/projects';
   const API_LIST = `https://api.github.com/repos/${REPO}/contents/${PROJECTS_PATH}`;
+  const SETTINGS_BASE = `https://raw.githubusercontent.com/${REPO}/master/content/settings`;
+
+  function esc(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Replace a title like "Geoffrey Brogniet." + "Complex problems…"
+  // with <h1>line1<br><span class="accent">line2</span></h1>
+  function setHeroTitle(line1, line2) {
+    const h1 = document.getElementById('hero-title');
+    if (!h1) return;
+    h1.innerHTML = `${esc(line1)}<br><span class="accent">${esc(line2).replace(/, /g, ',<br>')}</span>`;
+  }
+
+  async function loadJSON(name){
+    const res = await fetch(`${SETTINGS_BASE}/${name}.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error(`${name}: ${res.status}`);
+    return res.json();
+  }
+
+  async function loadHero(){
+    try {
+      const d = await loadJSON('hero');
+      const eyebrow = document.getElementById('hero-eyebrow');
+      const thesis = document.getElementById('hero-thesis');
+      const stats = document.getElementById('hero-stats');
+      if (eyebrow && d.eyebrow) eyebrow.textContent = d.eyebrow;
+      if (thesis && d.thesis) thesis.textContent = d.thesis;
+      if (d.title_line1 && d.title_line2_accent) setHeroTitle(d.title_line1, d.title_line2_accent);
+      if (stats && Array.isArray(d.stats) && d.stats.length) {
+        stats.innerHTML = d.stats.map(s =>
+          `<div class="stat"><div class="n">${esc(s.value)}</div><div class="l">${esc(s.label)}</div></div>`
+        ).join('');
+      }
+    } catch(e) { console.warn('hero:', e); }
+  }
+
+  async function loadExperience(){
+    try {
+      const d = await loadJSON('experience');
+      const list = document.getElementById('xp-list');
+      if (!list || !Array.isArray(d.items)) return;
+      list.innerHTML = d.items.map(it => {
+        const bullets = Array.isArray(it.bullets) && it.bullets.length
+          ? `<ul>${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : '';
+        return `<div class="xp-item reveal">
+          <span class="dates">${esc(it.dates)}</span>
+          <h3>${esc(it.title)}</h3>
+          <p class="org">${esc(it.org)}</p>
+          ${bullets}
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    } catch(e) { console.warn('experience:', e); }
+  }
+
+  async function loadSideProject(){
+    try {
+      const d = await loadJSON('side-project');
+      const root = document.getElementById('side-project');
+      if (!root) return;
+      const q = s => root.querySelector(s);
+      if (d.eyebrow)     q('[data-f="eyebrow"]').textContent = d.eyebrow;
+      if (d.title)       q('[data-f="title"]').textContent = d.title;
+      if (d.description) q('[data-f="description"]').textContent = d.description;
+      if (d.link_url) {
+        const a = q('[data-f="link"]');
+        a.href = d.link_url;
+        if (d.link_label) a.textContent = d.link_label;
+      }
+      if (Array.isArray(d.stack) && d.stack.length) {
+        q('[data-f="stack"]').innerHTML = d.stack.map(t => `<span>${esc(t)}</span>`).join('');
+      }
+    } catch(e) { console.warn('side-project:', e); }
+  }
+
+  async function loadSkills(){
+    try {
+      const d = await loadJSON('skills');
+      const grid = document.getElementById('skills-grid');
+      if (!grid || !Array.isArray(d.cards)) return;
+      grid.innerHTML = d.cards.map(c => `
+        <div class="skill reveal">
+          <h3>${esc(c.title)}</h3>
+          <ul>${(c.items||[]).map(i => `<li>${esc(i)}</li>`).join('')}</ul>
+        </div>`).join('');
+      grid.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    } catch(e) { console.warn('skills:', e); }
+  }
+
+  async function loadContact(){
+    try {
+      const d = await loadJSON('contact');
+      const heading = document.getElementById('contact-heading');
+      const email = document.getElementById('contact-email');
+      const links = document.getElementById('contact-links');
+      const footerLine = document.getElementById('contact-footer-line');
+      if (heading && d.heading) heading.textContent = d.heading;
+      if (email && d.email) { email.href = `mailto:${d.email}`; email.textContent = d.email; }
+      if (links && Array.isArray(d.links)) {
+        links.innerHTML = d.links.map(l => {
+          const ext = /^https?:/.test(l.url);
+          return `<a href="${esc(l.url)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${esc(l.label)}</a>`;
+        }).join('');
+      }
+      if (footerLine && d.footer_line) footerLine.textContent = d.footer_line;
+    } catch(e) { console.warn('contact:', e); }
+  }
 
   const statusInfo = (raw) => {
     const t = (raw || '').trim().toUpperCase();
@@ -376,6 +484,12 @@
   },{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
+  // Load every dynamic section. All are independent; one failure doesn't stop the others.
+  loadHero();
+  loadExperience();
+  loadSideProject();
+  loadSkills();
+  loadContact();
   loadProjects();
 </script>
 </body>

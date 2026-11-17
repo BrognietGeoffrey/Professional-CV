@@ -13,6 +13,7 @@ media_folder: "images"
 public_folder: "/images"
 
 collections:
+  # ---------- Projects (one entry per project card) ----------
   - name: "projects"
     label: "Projects (Selected Work cards)"
     label_singular: "Project"
@@ -34,3 +35,87 @@ collections:
       - { label: "Meta line (scope · role)", name: "meta", widget: "string", hint: "e.g. scope: BE + EU · role: project lead" }
       - { label: "Display order (lower = earlier)", name: "order", widget: "number", default: 50, value_type: "int", min: 1, max: 999 }
       - { label: "Description", name: "body", widget: "text", hint: "The paragraph that appears inside the card. Two sentences max." }
+
+  # ---------- Site settings (one entry per section) ----------
+  - name: "settings"
+    label: "Site sections"
+    label_singular: "Section"
+    editor:
+      preview: false
+    files:
+      - name: "hero"
+        label: "Hero (top of the page)"
+        file: "content/settings/hero.json"
+        fields:
+          - { label: "Eyebrow (small line above the title)", name: "eyebrow", widget: "string" }
+          - { label: "Title — line 1", name: "title_line1", widget: "string", hint: "e.g. Geoffrey Brogniet." }
+          - { label: "Title — line 2 (coloured)", name: "title_line2_accent", widget: "string", hint: "e.g. Complex problems, delivered end to end." }
+          - { label: "Intro paragraph (thesis)", name: "thesis", widget: "text" }
+          - label: "Key figures (4 stats)"
+            name: "stats"
+            widget: "list"
+            max: 4
+            min: 1
+            fields:
+              - { label: "Value", name: "value", widget: "string", hint: "e.g. €6M+" }
+              - { label: "Label", name: "label", widget: "string", hint: "e.g. programme budgets managed" }
+
+      - name: "experience"
+        label: "Experience / Timeline"
+        file: "content/settings/experience.json"
+        fields:
+          - label: "Entries"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "Dates", name: "dates", widget: "string", hint: "e.g. SEP 2023 — PRESENT" }
+              - { label: "Title / role", name: "title", widget: "string" }
+              - { label: "Organisation", name: "org", widget: "string" }
+              - label: "Bullet points"
+                name: "bullets"
+                widget: "list"
+                field: { label: "Bullet", name: "bullet", widget: "string" }
+                required: false
+
+      - name: "side-project"
+        label: "Side project (Lunch Orders)"
+        file: "content/settings/side-project.json"
+        fields:
+          - { label: "Eyebrow", name: "eyebrow", widget: "string" }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Description", name: "description", widget: "text" }
+          - { label: "Link URL", name: "link_url", widget: "string" }
+          - { label: "Link label", name: "link_label", widget: "string" }
+          - label: "Tech stack"
+            name: "stack"
+            widget: "list"
+            field: { label: "Tech", name: "tech", widget: "string" }
+
+      - name: "skills"
+        label: "Skills & languages"
+        file: "content/settings/skills.json"
+        fields:
+          - label: "Cards (3 columns)"
+            name: "cards"
+            widget: "list"
+            max: 4
+            fields:
+              - { label: "Card title", name: "title", widget: "string" }
+              - label: "Items (one per line)"
+                name: "items"
+                widget: "list"
+                field: { label: "Item", name: "item", widget: "string" }
+
+      - name: "contact"
+        label: "Contact / Footer"
+        file: "content/settings/contact.json"
+        fields:
+          - { label: "Heading", name: "heading", widget: "string", hint: "e.g. Let's talk." }
+          - { label: "Email", name: "email", widget: "string" }
+          - label: "Links (socials, phone)"
+            name: "links"
+            widget: "list"
+            fields:
+              - { label: "Label", name: "label", widget: "string" }
+              - { label: "URL", name: "url", widget: "string", hint: "https://… for web, mailto:… for email, tel:… for phone" }
+          - { label: "Footer line", name: "footer_line", widget: "text", hint: "Small line below the links" }
